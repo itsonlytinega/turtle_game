@@ -88,3 +88,49 @@ class Scoreboard:
     def increase_score(self):
         self.score += 10  # Increase score as the player progresses
 
+# Function to draw the sphere
+def draw_sphere(surface, center_x, center_y, radius):
+    pygame.draw.circle(surface, (150, 150, 150), (center_x, center_y), radius)
+    pygame.draw.circle(surface, (100, 100, 100), (center_x, center_y), int(radius * 0.7))
+    pygame.draw.circle(surface, (50, 50, 50), (center_x, center_y), int(radius * 0.5))
+
+# Game Loop
+def game_loop():
+    screen_paused = False
+    game_over = False  # Track if the game is over
+    player = Player()
+    car_manager = CarManager()
+    score = Scoreboard()
+
+    while True:  # Keep the game loop running even after the game over
+        screen.fill((0, 0, 0))  # Fill the screen with black
+
+        # Event Handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return  # Exit the program
+
+        # Key Press Handling
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:  # Toggle pause on spacebar
+            if not game_over:  # Prevent toggling pause if game is over
+                screen_paused = not screen_paused
+                pygame.time.delay(300)  # Delay to avoid toggle on a single keypress
+
+        if not screen_paused and not game_over:
+            if keys[pygame.K_UP]:
+                player.move_up()
+            if keys[pygame.K_LEFT]:
+                player.move_left()
+            if keys[pygame.K_RIGHT]:
+                player.move_right()
+            if keys[pygame.K_DOWN]:
+                player.move_down()
+
+            if keys[pygame.K_r]:  # Restart the game if 'R' is pressed
+                player.reset_position()
+                car_manager.all_cars.clear()
+                car_manager.move_increment = 0
+                score.reset()
+                game_over = False  # Reset game over flag
