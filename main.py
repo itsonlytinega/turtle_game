@@ -134,3 +134,55 @@ def game_loop():
                 car_manager.move_increment = 0
                 score.reset()
                 game_over = False  # Reset game over flag
+                
+ # Check for collisions
+            for car in car_manager.all_cars:
+                car_rect = pygame.Rect(car["x"], car["y"], car["width"], car["height"])
+                player_rect = pygame.Rect(player.x - player.radius, player.y - player.radius, player.radius * 2, player.radius * 2)
+                if car_rect.colliderect(player_rect):
+                    score.game_over()  # Display game over
+                    game_over = True  # Set game over state
+                    break
+
+            # Detect successful crossing and speed up cars
+            if player.is_at_finish_line():
+                player.reset_position()  # Reset player only when crossing finish line
+                car_manager.increase_speed()  # Increase speed of cars
+                score.current_level += 1  # Increase level
+                score.increase_score()  # Increase score
+
+            # Draw the player and simulate 3D effect
+            player.draw()
+
+            # Move cars
+            car_manager.make_car()
+            car_manager.move()
+
+            # Draw cars
+            for car in car_manager.all_cars:
+                pygame.draw.rect(screen, car["color"], (car["x"], car["y"], car["width"], car["height"]))
+
+            # Update scoreboard
+            score.update_scoreboard()
+
+        else:
+            # If the game is over, show the "Game Over" message
+            if game_over:
+                score.game_over()
+            # Display pause message only if the game is paused
+            elif screen_paused:
+                pause_text = score.font.render("PAUSED - Press Space to Resume", True, (255, 255, 255))
+                screen.blit(pause_text, (WIDTH // 2 - 150, HEIGHT // 2))
+
+        # Update the display
+        pygame.display.update()
+
+        # Control the frame rate (reduce the FPS to slow down the game)
+        clock.tick(30)  # Reduced the FPS for slower game speed
+
+        # Restart after pressing 'R' after game over
+        if game_over and keys[pygame.K_r]:
+            game_loop()  # Restart the game loop
+
+# Run the game loop
+game_loop()
